@@ -28,38 +28,20 @@ let nb2 = 9
 let nb3 = 0
 
 let iFrame = 0
-let rotG = 0
-
-function preload() {
-  font = loadFont('Glametrix.otf');
-}
 
 function setup() {
-  createCanvas(800, 800, WEBGL);
+  createCanvas(800, 800);
 
-  textFont(font);
-  textSize(36);
-
-  setSegments(0, 2, 20, 400, 200, 20)
-  setSegments(0, 4, 20, 400, 200, 20)
-  setSegments(0, 6, 20, 400, 200, 20)
+  setSegments(0, 2, 100, 400, 200, 200)
+  setSegments(0, 4, 100, 400, 200, 200)
+  setSegments(0, 6, 100, 400, 200, 200)
 }
 
 function draw() {
   // Your draw code here
   background(50);
-
-  ambientLight(255, 60, 60);
-  pointLight(255, 255, 255, 100, 100, 100);
-
   // Call the method to draw points with squares
-  push();
-  //rotateX(rotG);
-  rotateY(0.05 * rotG);
-  //rotateY(-PI/8);
-  rotG = rotG + 0.1
   drawPointsWithSquares();
-  pop();
 
   let changeNeeded = false
 
@@ -87,9 +69,9 @@ function draw() {
       iPosInPool = 0; // Start again from 0
 
       // As we will morph, they will be the target of the update morphing.
-      setSegments(nb1, 0, 20, 200, 30, rotG + 200)
-      setSegments(nb2, 2, 20, 200, 30, rotG + 200)
-      setSegments(nb3, 4, 20, 200, 30, rotG + 200)
+      setSegments(nb1, 2, 100, 400, 600, 200)
+      setSegments(nb2, 4, 100, 400, 600, 200)
+      setSegments(nb3, 6, 100, 400, 600, 200)
     }
   }
 }
@@ -98,18 +80,18 @@ function drawPointsWithSquares() {
   if (isInTransition) {
     // From bis to normal
     for (let iDraw = 0; iDraw < iPosInPool; ++iDraw) {
-      let currentType = typeOfElement[iDraw];
-
-      if (currentType != 0) {
+      {
         let r = colR[iDraw] * 255; // Scale color values to 0-255
 
-        normalMaterial();
-        push();
-        translate(currentStep * posX[iDraw] + (1 - currentStep) * posXBis[iDraw], currentStep * posY[iDraw] + (1 - currentStep) * posYBis[iDraw], currentStep * posZ[iDraw] + (1 - currentStep) * posZBis[iDraw]);
-        rotateX(currentStep * rotX[iDraw] + (1 - currentStep) * rotXBis[iDraw]);
-        ambientMaterial(r);
-        plane(4); // Adjust the size of the square as needed
-        pop();
+        let x = currentStep * posX[iDraw] + (1 - currentStep) * posXBis[iDraw];
+        let y = currentStep * posY[iDraw] + (1 - currentStep) * posYBis[iDraw];
+        let z = currentStep * posZ[iDraw] + (1 - currentStep) * posZBis[iDraw];
+        let r2 = colR[iDraw] * 255; // Scale color values to 0-255
+        let g = colG[iDraw] * 255;
+        let b = colB[iDraw] * 255;
+        fill(r2, g, b);
+        noStroke();
+        square(x, y, 5); // Adjust the size of the square as needed
       }
     }
 
@@ -129,30 +111,24 @@ function drawPointsWithSquares() {
       let g = colG[i] * 255;
       let b = colB[i] * 255;
 
-
-      normalMaterial();
-      push();
-      translate(x, y, z);
-      rotateX(rotX[i]);
-      ambientMaterial(r);
-      plane(4); // Adjust the size of the square as needed
-      pop();
+      fill(r, g, b);
+      noStroke();
+      square(x, y, 5); // Adjust the size of the square as needed
     }
   }
 }
 
 let maxPoints = 0
 
-// Size is somehow not used.
 function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, segPosZ) {
+
+  maxPoints = nbOfPointsPerSegment * 7
   // Segments
   //   _
   //  | |
   //   -
   //  | |
   //   -
-
-  maxPoints = nbOfPointsPerSegment * 7;
 
   // We always show all segments, but not with the same color and depth
 
@@ -162,8 +138,8 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
       posX[iPosInPool] = 1 + relPosition * (nbOfPointsPerSegment + 8) + iPoint;
       posY[iPosInPool] = - (nbOfPointsPerSegment + 1) + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -179,12 +155,14 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
 
   // 2 left up |
   for (let iPoint = 0; iPoint < nbOfPointsPerSegment; iPoint++) {
+
+
     if ((numbersMatrix[number] & 2) !== 0) {
       posX[iPosInPool] = relPosition * (nbOfPointsPerSegment + 8);
       posY[iPosInPool] = -(1 + iPoint) + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -200,13 +178,12 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
 
   // 4 left up |
   for (let iPoint = 0; iPoint < nbOfPointsPerSegment; iPoint++) {
-
     if ((numbersMatrix[number] & 4) !== 0) {
       posX[iPosInPool] = nbOfPointsPerSegment + 1 + relPosition * (nbOfPointsPerSegment + 8);
       posY[iPosInPool] = -(1 + iPoint) + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -227,8 +204,8 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
       posX[iPosInPool] = 1 + relPosition * (nbOfPointsPerSegment + 8) + iPoint;
       posY[iPosInPool] = relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -250,8 +227,8 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
       posX[iPosInPool] = relPosition * (nbOfPointsPerSegment + 8);
       posY[iPosInPool] = 1 + iPoint + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -267,13 +244,12 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
 
   // 32, right bottom |
   for (let iPoint = 0; iPoint < nbOfPointsPerSegment; iPoint++) {
-
     if ((numbersMatrix[number] & 32) !== 0) {
       posX[iPosInPool] = nbOfPointsPerSegment + 1 + relPosition * (nbOfPointsPerSegment + 8);
       posY[iPosInPool] = 1 + iPoint + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -294,8 +270,8 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
       posX[iPosInPool] = 1 + relPosition * (nbOfPointsPerSegment + 8) + iPoint;
       posY[iPosInPool] = nbOfPointsPerSegment + 1 + relPosY;
 
-      //posX[iPosInPool] *= 0.25;
-      //posY[iPosInPool] *= 0.25;
+      posX[iPosInPool] *= 0.25;
+      posY[iPosInPool] *= 0.25;
 
       posZ[iPosInPool] = segPosZ;
 
@@ -306,19 +282,6 @@ function setSegments(number, relPosition, nbOfPointsPerSegment, size, relPosY, s
       rotX[iPosInPool] = 0;
 
       iPosInPool++;
-    }
-  }
-  if (iPosInPool < maxPoints) {
-    for (let iElements = iPosInPool; iElements < maxPoints; iElements++) {
-      posX[iElements] = 1000;
-      posY[iElements] = 1000;
-      posZ[iElements] = -100;
-
-      colR[iElements] = 0;
-      colG[iElements] = 0;
-      colB[iElements] = 0;
-
-      rotX[iElements] = 0;
     }
   }
 }
@@ -343,9 +306,9 @@ function prepareTransition(nbOfSteps) {
   // If we have more origin points that taget points, we still need to save them
   if (iPosInPool < maxPoints) {
     for (let iElements = iPosInPool; iElements < maxPoints; iElements++) {
-      posXBis[iElements] = 1000;
-      posYBis[iElements] = 1000;
-      posZBis[iElements] = -100;
+      posXBis[iElements] = 100;
+      posYBis[iElements] = 100;
+      posZBis[iElements] = 100;
 
       colRBis[iElements] = 0;
       colGBis[iElements] = 0;
