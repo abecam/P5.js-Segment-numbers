@@ -31,14 +31,11 @@ let iFrame = 0
 let rotG = 0
 
 function preload() {
-    font = loadFont('Glametrix.otf');
+   
 }
 
 function setup() {
     createCanvas(800, 800, WEBGL);
-
-    textFont(font);
-    textSize(36);
 
     setSegments(0, 2, 20, 400, 200, 20)
     setSegments(0, 4, 20, 400, 200, 20)
